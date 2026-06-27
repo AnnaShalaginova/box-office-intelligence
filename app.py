@@ -343,13 +343,14 @@ with col4:
 st.write("") # Spacing
 
 # 8. TABS LAYOUT
-tab_financials, tab_genres, tab_market, tab_correlations, tab_builder, tab_search = st.tabs([
+tab_financials, tab_genres, tab_market, tab_correlations, tab_builder, tab_search, tab_about = st.tabs([
     "📊 Financial Performance",
     "🎭 Genre Insights",
     "🗺️ Market Map",
     "📈 Ratings & Languages",
     "🧪 Chart Builder",
-    "🔍 Search & Export"
+    "🔍 Search & Export",
+    "ℹ️ About"
 ])
 
 # COLOR PALETTES
@@ -984,4 +985,71 @@ with tab_search:
         file_name="filtered_box_office_data.csv",
         mime="text/csv",
         use_container_width=True
+    )
+
+# --- TAB 7: ABOUT & DATA SOURCE ---
+with tab_about:
+    st.subheader("About This Dashboard")
+
+    source_min_year = int(df_raw["Year"].min())
+    source_max_year = int(df_raw["Year"].max())
+    source_movie_count = len(df_raw)
+    source_total_gross = df_raw["Worldwide_Gross"].sum()
+
+    st.markdown(
+        f"""
+        Box Office Intelligence is an interactive dashboard for exploring movie revenue,
+        audience ratings, genre performance, and market composition from
+        **{source_min_year} through {source_max_year}**.
+
+        The app is designed for exploratory analysis. Use the sidebar filters to narrow
+        the dataset by year, rating, vote count, genre, language, or movie title; every
+        chart updates from the filtered dataset.
+        """
+    )
+
+    about_col_1, about_col_2, about_col_3 = st.columns(3)
+    about_col_1.metric("Source Records", f"{source_movie_count:,}")
+    about_col_2.metric("Year Range", f"{source_min_year}-{source_max_year}")
+    about_col_3.metric("Worldwide Gross", format_currency(source_total_gross))
+
+    st.markdown("### Data Source")
+    st.markdown(
+        """
+        The dashboard reads from the local SQLite database file `movies.db`.
+        That database was prepared from the project CSV data and contains one
+        row per movie release group.
+
+        The main table used by the app is `box_office`.
+        """
+    )
+
+    st.markdown("### Key Fields")
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {"Field": "Release_Group", "Meaning": "Movie or release group title"},
+                {"Field": "Year", "Meaning": "Release year"},
+                {"Field": "Worldwide_Gross", "Meaning": "Total worldwide box office revenue"},
+                {"Field": "Domestic_Gross", "Meaning": "Domestic box office revenue"},
+                {"Field": "Foreign_Gross", "Meaning": "International box office revenue"},
+                {"Field": "Genres", "Meaning": "Comma-separated genre labels"},
+                {"Field": "Rating", "Meaning": "Audience rating on a 10-point scale"},
+                {"Field": "Vote_Count", "Meaning": "Number of audience rating votes"},
+                {"Field": "Original_Language", "Meaning": "Original language code"},
+                {"Field": "Production_Countries", "Meaning": "Comma-separated production country labels"},
+            ]
+        ),
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.markdown("### Interpretation Notes")
+    st.markdown(
+        """
+        - Revenue charts use gross box office revenue, not profit.
+        - Genre and production country charts split comma-separated values, so one movie can count in multiple categories.
+        - Ratings and vote counts are audience-signal fields and should be interpreted separately from financial performance.
+        - The dashboard is best used for comparing patterns and segments, not as a final financial accounting system.
+        """
     )
